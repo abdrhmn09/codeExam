@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+model User {
+  id                    String                   @id @default(uuid())
+  name                  String?
+  npm                   String?                  @unique
+  email                 String                   @unique
+  password              String
+  role                  UserRole                 @default(user)
+  emailVerifiedAt       DateTime?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  verificationTokens    EmailVerificationToken[]
+  teacherClasses        Class[]                  @relation("TeacherClasses")
+  studentEnrollments    ClassEnrollment[]        @relation("StudentEnrollments")
+  examAttempts          ExamAttempt[]            @relation("StudentAttempts")
+
+  @@index([email])
+}
+
+model EmailVerificationToken {
+  id         String   @id @default(uuid())
+  userId     String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Class {
+  id          String             @id @default(uuid())
+  teacherId   String
+  teacher     User               @relation("TeacherClasses", fields: [teacherId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  inviteCode  String             @unique
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  enrollments ClassEnrollment[]
+  exams       Exam[]
+}
+
+model ClassEnrollment {
+  id         String   @id @default(uuid())
+  classId    String
+  class      Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User     @relation("StudentEnrollments", fields: [studentId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime @default(now())
+
+  @@unique([classId, studentId])
+}
+
+model Exam {
+  id             String        @id @default(uuid())
+  classId        String
+  class          Class         @relation(fields: [classId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  startTime      DateTime
+  endTime        DateTime
+  durationLimit  Int?          // Dalam menit, opsional
+  isPublished    Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  attempts       ExamAttempt[]
+}
+
+model ExamAttempt {
+  id            String    @id @default(uuid())
+  examId        String
+  exam          Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  studentId     String
+  student       User      @relation("StudentAttempts", fields: [studentId], references: [id], onDelete: Cascade)
+  startTime     DateTime  @default(now())
+  submittedAt   DateTime?
+  status        String    @default("ONGOING") // ONGOING, SUBMITTED
+  code          String?
+  score         Int?
+  comment       String?
+  warningCount  Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([examId, studentId])
+}
