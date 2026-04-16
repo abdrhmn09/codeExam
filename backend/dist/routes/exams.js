@@ -163,7 +163,7 @@ export const examRoutes = async (app) => {
         });
         return reply.send({ message: "Peringatan tercatat" });
     });
-    // Admin melihat detail attempt siswa
+    // Pemilik kelas melihat detail attempt siswa
     app.get("/api/exams/:id/attempts/:studentId", { preHandler: [requireAuth] }, async (request, reply) => {
         const { id, studentId } = request.params;
         const exam = await prisma.exam.findUnique({ where: { id }, include: { class: true } });

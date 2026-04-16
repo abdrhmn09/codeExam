@@ -3,6 +3,5 @@ export type User = {
   name?: string | null
   npm?: string | null
   email: string
-  role: string
   emailVerifiedAt?: string | null
 }

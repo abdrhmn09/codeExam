@@ -218,7 +218,7 @@ export const examRoutes = async (app: FastifyInstance) => {
     }
   );
 
-  // Admin melihat detail attempt siswa
+  // Pemilik kelas melihat detail attempt siswa
   app.get<{ Params: { id: string, studentId: string } }>(
     "/api/exams/:id/attempts/:studentId",
     { preHandler: [requireAuth] },

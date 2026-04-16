@@ -8,7 +8,6 @@ const SALT_ROUNDS = 12;
 export type AuthPayload = {
   sub: string;
   email: string;
-  role: "user" | "admin";
 };
 
 export const hashPassword = async (password: string) => {

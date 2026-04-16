@@ -14,21 +14,8 @@ export const requireAuth = async (request: FastifyRequest, reply: FastifyReply) 
     request.user = {
       id: payload.sub,
       email: payload.email,
-      role: payload.role,
     };
   } catch {
     return reply.status(401).send({ message: "Invalid or expired session" });
   }
-};
-
-export const requireRole = (role: "admin" | "user") => {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
-    if (!request.user) {
-      return reply.status(401).send({ message: "Unauthorized" });
-    }
-
-    if (request.user.role !== role) {
-      return reply.status(403).send({ message: "Forbidden" });
-    }
-  };
 };

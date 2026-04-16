@@ -110,7 +110,6 @@ export const authRoutes = async (app) => {
         const token = signSessionToken({
             sub: user.id,
             email: user.email,
-            role: user.role,
         });
         reply.setCookie(config.cookieName, token, {
             httpOnly: true,
@@ -126,7 +125,6 @@ export const authRoutes = async (app) => {
                 name: user.name,
                 npm: user.npm,
                 email: user.email,
-                role: user.role,
             },
         });
     });
@@ -150,7 +148,7 @@ export const authRoutes = async (app) => {
     app.get("/api/auth/me", { preHandler: [requireAuth] }, async (request, reply) => {
         const user = await prisma.user.findUnique({
             where: { id: request.user.id },
-            select: { id: true, name: true, npm: true, email: true, role: true, emailVerifiedAt: true },
+            select: { id: true, name: true, npm: true, email: true, emailVerifiedAt: true },
         });
         if (!user) {
             return reply.status(401).send({ message: "Unauthorized" });
